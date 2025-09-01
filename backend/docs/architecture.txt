@@ -1,0 +1,406 @@
+# STUDY PLATFORM BACKEND ARCHITECTURE
+
+This document provides a detailed explanation of the backend architecture for the Study Platform application. It covers the project structure, packages, models, and design decisions.
+
+## TABLE OF CONTENTS
+
+1. Project Overview
+2. Directory Structure
+3. Core Packages
+   3.1. Database
+   3.2. Auth
+   3.3. Logger
+   3.4. Middleware
+   3.5. Storage
+   3.6. Models
+   3.7. API Response Handling
+   3.8. Utils
+4. API Gateway
+5. Environment Configuration
+6. Docker Setup
+7. Development Workflow
+
+## 1. PROJECT OVERVIEW
+
+The Study Platform backend is a modular, service-oriented API built with Go. It provides functionality for:
+
+- User authentication and management
+- Study room creation and management
+- Session tracking for productivity
+- Content management (materials, todos, notes)
+- File storage for study materials
+- Real-time collaboration features
+
+The architecture follows modern Go best practices with a clean separation of concerns, dependency injection, and modular design. It's built to be scalable, maintainable, and extensible.
+
+## 2. DIRECTORY STRUCTURE
+
+The project follows a standard Go project layout:
+
+```
+backend/
+├── .env.example           # Example environment variables
+├── cmd/                   # Command-line applications
+│   └── api/               # API gateway service
+│       └── main.go        # Entry point for the API gateway
+├── internal/              # Private application code
+│   ├── auth/              # Authentication service
+│   ├── room/              # Room management service
+│   ├── session/           # Session tracking service
+│   ├── content/           # Content management service
+│   └── realtime/          # Real-time communication service
+├── pkg/                   # Public library code
+│   ├── api/               # API utilities
+│   ├── auth/              # Authentication utilities
+│   ├── database/          # Database connection
+│   ├── logger/            # Logging utilities
+│   ├── middleware/        # HTTP middleware
+│   ├── models/            # Data models
+│   ├── storage/           # File storage
+│   └── utils/             # Utility functions
+└── test/                  # Test files
+```
+
+- `cmd/`: Contains the main entry points for different applications
+- `internal/`: Private application code not meant to be imported by other projects
+- `pkg/`: Public library code that can be imported by other projects
+- `test/`: Test files and test utilities
+
+## 3. CORE PACKAGES
+
+### 3.1. Database (pkg/database)
+
+The `database` package manages connections to MongoDB, providing a clean interface for other packages to interact with the database.
+
+Key components:
+- `MongoClient`: Main struct that holds the MongoDB client connection
+- `NewMongoClient()`: Creates a new MongoDB client from environment variables
+- `GetCollection()`: Returns a collection from the database
+- `CollectionNames`: Constants for collection names to avoid hardcoding strings
+
+The database connection is configured through environment variables:
+- `MONGODB_URI`: MongoDB connection string
+- `MONGODB_DATABASE`: Database name
+
+Implementation details:
+- Connection pooling is handled by the MongoDB driver
+- Graceful startup with connection verification
+- Proper context handling for connection lifetime
+- Graceful shutdown with resource cleanup
+
+### 3.2. Auth (pkg/auth)
+
+The `auth` package provides JWT-based authentication services.
+
+Key components:
+- `Manager`: Handles JWT token operations
+- `Claims`: Represents JWT claims with user information
+- `TokenType`: Enum for different token types (access/refresh)
+- `GenerateAccessToken()`: Creates short-lived access tokens
+- `GenerateRefreshToken()`: Creates long-lived refresh tokens
+- `ValidateAccessToken()`: Validates access tokens
+- `ValidateRefreshToken()`: Validates refresh tokens
+
+JWT configuration is handled through environment variables:
+- `JWT_SECRET`: Secret key for signing JWTs
+- `JWT_REFRESH_SECRET`: Separate secret for refresh tokens (defaults to JWT_SECRET + "_refresh")
+- `JWT_ACCESS_EXPIRY`: Access token expiry (e.g., "15m")
+- `JWT_REFRESH_EXPIRY`: Refresh token expiry (e.g., "7d")
+
+Security features:
+- Different token types with validation
+- Separate secrets for access and refresh tokens
+- Token expiry validation
+- Token rotation with refresh tokens
+
+### 3.3. Logger (pkg/logger)
+
+The `logger` package provides structured logging capabilities using Zap.
+
+Key components:
+- `Init()`: Initializes the logger with the appropriate configuration
+- `Debug()`, `Info()`, `Warn()`, `Error()`, `Fatal()`: Log methods for different levels
+- `Field()`: Helper to create structured log fields
+- `Close()`: Flushes any buffered log entries
+
+Logger configuration is handled through environment variables:
+- `LOG_LEVEL`: Sets the minimum log level (debug, info, warn, error)
+
+Features:
+- Structured logging with key-value pairs
+- Color-coded console output for different log levels
+- Automatic caller information
+- Automatic stacktrace for error level and above
+- Performance-optimized logging
+
+### 3.4. Middleware (pkg/middleware)
+
+The `middleware` package provides HTTP middleware for Gin.
+
+Key components:
+- `CORS()`: Configures Cross-Origin Resource Sharing
+- `Logger()`: Logs HTTP requests and responses
+- `Auth()`: Verifies JWT tokens in requests
+- `Recovery()`: Recovers from panics in request handlers
+- `RateLimiter()`: Limits request rates (placeholder for implementation)
+- `RequestID()`: Adds a unique ID to each request
+
+CORS configuration is handled through environment variables:
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed origins
+
+Features:
+- Request logging with method, path, status, latency
+- JWT token validation with user context injection
+- Panic recovery with graceful error responses
+- Request tracking with unique IDs
+- Configurable CORS policy
+
+### 3.5. Storage (pkg/storage)
+
+The `storage` package provides file storage capabilities using MinIO.
+
+Key components:
+- `MinioClient`: Manages connections to MinIO
+- `Initialize()`: Creates required buckets if they don't exist
+- `UploadFile()`: Uploads a file to MinIO
+- `DownloadFile()`: Downloads a file from MinIO
+- `GetPresignedURL()`: Generates pre-signed URLs for temporary access
+- `DeleteFile()`: Deletes a file from MinIO
+- `ListFiles()`: Lists files in a bucket
+
+MinIO configuration is handled through environment variables:
+- `MINIO_ENDPOINT`: MinIO server endpoint
+- `MINIO_ACCESS_KEY`: Access key for MinIO
+- `MINIO_SECRET_KEY`: Secret key for MinIO
+- `MINIO_USE_SSL`: Whether to use SSL for MinIO connections
+- `MINIO_BUCKET_*`: Names for different buckets (avatars, materials, temp)
+
+Features:
+- Lazy initialization of buckets
+- Type-safe bucket selection
+- Pre-signed URL generation for secure, temporary access
+- Error handling with detailed messages
+
+### 3.6. Models (pkg/models)
+
+The `models` package defines the data models for the application.
+
+#### 3.6.1. User Model
+
+The `User` model represents a user in the system with fields for:
+- Basic information (username, email, password, name)
+- Profile data (avatar, bio, XP, level)
+- Relationships (friends, rooms)
+- Authentication (refresh tokens)
+- Timestamps and status flags
+
+It includes:
+- `UserForResponse`: A safe version for API responses
+- `RefreshToken`: A structure for refresh token management
+- Request/response DTOs for common operations
+- `ToResponse()`: Converts internal model to API response
+
+#### 3.6.2. Room Model
+
+The `Room` model represents a study room with fields for:
+- Basic information (name, description)
+- Privacy settings
+- Participants
+- Content (materials, todos, notes)
+- Invitation code for private rooms
+- Session history and statistics
+
+It includes:
+- `RoomPrivacy`: Enum for room privacy levels
+- `RoomForResponse`: A version for API responses
+- Request/response DTOs for common operations
+- `ToResponse()`: Converts internal model to API response
+
+#### 3.6.3. Session Model
+
+The `Session` model tracks study sessions with fields for:
+- Association (room, user)
+- Timing (start, end, duration)
+- Productivity metrics (XP earned)
+- Activity tracking
+- Status information
+
+It includes:
+- `Activity`: Nested structure for tracking user actions
+- `SessionForResponse`: A version for API responses
+- `SessionSummary`: Aggregated statistics
+- Request/response DTOs for common operations
+- `ToResponse()`: Converts internal model to API response
+
+#### 3.6.4. Material Model
+
+The `Material` model represents study materials with fields for:
+- Basic information (name, description)
+- Type (file or link)
+- File metadata
+- Associations (room, uploader)
+- Usage statistics (view count)
+
+It includes:
+- `MaterialType`: Enum for material types
+- `FileMetadata`: Nested structure for file details
+- `MaterialForResponse`: A version for API responses
+- Request/response DTOs for common operations
+- `ToResponse()`: Converts internal model to API response
+
+#### 3.6.5. Todo Model
+
+The `Todo` model represents tasks with fields for:
+- Basic information (title, description)
+- Status (completed)
+- Scheduling (due date)
+- Priority
+- Assignments
+- Progress tracking
+
+It includes:
+- `TodoForResponse`: A version for API responses
+- Request/response DTOs for common operations
+- `ToResponse()`: Converts internal model to API response
+
+#### 3.6.6. Note Model
+
+The `Note` model represents shared notes with fields for:
+- Content (title, content)
+- Sharing settings (shared with, public)
+- Revision tracking
+- Associations (room, creator)
+
+It includes:
+- `NoteRevision`: Nested structure for tracking changes
+- `NoteForResponse`: A version for API responses
+- Request/response DTOs for common operations
+- `ToResponse()`: Converts internal model to API response
+
+### 3.7. API Response Handling (pkg/api)
+
+The `api` package standardizes API responses.
+
+Key components:
+- `Response`: Standard structure for all API responses
+- `Error`: Structure for error details
+- `Meta`: Structure for metadata (pagination, timestamps)
+- `NewSuccessResponse()`: Creates a success response
+- `NewErrorResponse()`: Creates an error response
+- `NewPaginatedResponse()`: Creates a paginated response
+
+Features:
+- Consistent response format
+- Standard error codes and messages
+- Pagination support
+- Timestamps and processing time tracking
+
+### 3.8. Utils (pkg/utils)
+
+The `utils` package provides common utility functions.
+
+Key functions:
+- `GenerateUUID()`: Generates a new UUID
+- `GenerateToken()`: Generates a random token string
+- `StructToMap()`: Converts a struct to a map
+- `IsValidEmail()`: Validates email format
+- `FormatDatetime()`: Formats timestamps
+- `SanitizeString()`: Removes special characters
+- `RespondWithJSON()`: Sends a JSON response
+- `GetContentType()`: Detects content type from filename
+
+## 4. API GATEWAY
+
+The API Gateway is the main entry point for the application, defined in `cmd/api/main.go`. It:
+
+1. Loads environment variables
+2. Initializes the logger
+3. Connects to MongoDB
+4. Sets up the Gin router with middleware
+5. Registers API routes
+6. Starts the HTTP server
+7. Handles graceful shutdown
+
+The API is structured around resource-based routes:
+- `/api/v1/auth`: Authentication endpoints
+- `/api/v1/users`: User management
+- `/api/v1/rooms`: Room management
+- `/api/v1/sessions`: Session tracking
+- `/api/v1/materials`: Material management
+- `/api/v1/todos`: Todo management
+- `/api/v1/notes`: Note management
+
+Each route group has standard REST endpoints (GET, POST, PUT, DELETE) for resource management.
+
+## 5. ENVIRONMENT CONFIGURATION
+
+Environment variables are defined in `.env.example` and loaded using godotenv. Key variables include:
+
+- Server configuration: `PORT`, `ENV`
+- MongoDB configuration: `MONGODB_URI`, `MONGODB_DATABASE`
+- JWT configuration: `JWT_SECRET`, `JWT_ACCESS_EXPIRY`, `JWT_REFRESH_EXPIRY`
+- MinIO configuration: `MINIO_*`
+- Logging: `LOG_LEVEL`
+- CORS: `ALLOWED_ORIGINS`
+- Service URLs: `*_SERVICE_URL`
+
+## 6. DOCKER SETUP
+
+The application is containerized using Docker with multi-stage builds:
+
+1. Builder stage:
+   - Uses `golang:1.21-alpine` as the base image
+   - Copies dependencies first for better caching
+   - Builds a statically linked binary
+
+2. Final stage:
+   - Uses minimal `alpine` image
+   - Only includes the compiled binary and certificates
+   - Exposes port 8080
+
+Docker Compose is provided for local development with:
+- API service
+- MongoDB service
+- MinIO service
+- MinIO bucket initialization service
+
+The setup includes:
+- Volume mounting for code changes
+- Environment variable injection
+- Network configuration
+- Data persistence with volumes
+
+## 7. DEVELOPMENT WORKFLOW
+
+The project includes a `Makefile` with common commands:
+
+- `make build`: Builds the application
+- `make run`: Runs the application
+- `make test`: Runs tests
+- `make clean`: Cleans build artifacts
+- `make docker-build`: Builds the Docker image
+- `make docker-run`: Runs the Docker container
+- `make docker-compose-up`: Starts services with Docker Compose
+- `make docker-compose-down`: Stops services with Docker Compose
+- `make init-dev`: Initializes the development environment
+- `make help`: Shows help information
+
+For development:
+1. Copy `.env.example` to `.env` and update values
+2. Run `make init-dev` to set up the environment
+3. Run `make docker-compose-up` to start dependencies
+4. Run `make run` to start the application
+5. Access the API at http://localhost:8080
+
+## CONCLUSION
+
+The Study Platform backend provides a solid foundation for building a collaborative study application. Its modular design allows for easy extension and maintenance, while the use of modern Go practices ensures performance and reliability.
+
+The architecture separates concerns into well-defined packages, making it easy to understand and modify individual components without affecting the entire system. The use of interfaces and dependency injection allows for easy testing and mocking.
+
+Next steps for development include:
+1. Implementing the handler functions for each API endpoint
+2. Adding comprehensive tests
+3. Implementing real-time features with WebSockets
+4. Setting up CI/CD pipelines
+5. Adding API documentation with Swagger/OpenAPI 

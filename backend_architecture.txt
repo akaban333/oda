@@ -1,0 +1,426 @@
+# Backend Architecture for Study Platform
+
+## Technology Stack
+- **Programming Language**: Go (Golang)
+- **Database**: MongoDB
+- **Authentication**: JWT (JSON Web Tokens)
+- **Real-time Communication**: WebSocket for chat, WebRTC for video calls
+- **File Storage**: MinIO (S3-compatible object storage)
+- **API Design**: RESTful APIs with versioning
+- **Containerization**: Docker
+- **Orchestration**: Kubernetes (optional for scaling)
+- **CI/CD**: GitHub Actions or GitLab CI
+
+## System Architecture
+
+### 1. Microservices Structure
+The backend will be organized into the following microservices:
+
+1. **Auth Service**
+   - Handles user registration, login, token management
+   - Manages user profiles and XP progression
+   - Friend connections management
+
+2. **Room Service**
+   - Room creation, management and deletion
+   - Room participation and invitation handling
+   - Permission controls based on XP levels
+
+3. **Session Service**
+   - Study session management (start/end)
+   - XP tracking and rewards
+   - Inactivity monitoring
+
+4. **Content Service**
+   - Materials/file upload and management
+   - Todo list management
+   - Notes management
+   - Content sharing permissions
+
+5. **Real-time Service**
+   - WebSocket server for live updates and chat
+   - WebRTC signaling for video calls
+   - Screen sharing coordination
+
+6. **Analytics Service**
+   - Usage statistics and reporting
+   - Performance monitoring
+   - User behavior analytics
+
+### 2. Database Schema (MongoDB)
+
+#### Users Collection
+```json
+{
+  "_id": ObjectId("user_id"),
+  "email": "email@example.com",
+  "username": "username",
+  "password_hash": "hashed_password",
+  "display_name": "Display Name",
+  "avatar_url": "http://example.com/avatar.jpg",
+  "xp": 250,
+  "level": 1,
+  "created_at": ISODate("2023-01-01T00:00:00Z"),
+  "last_active": ISODate("2023-01-10T00:00:00Z"),
+  "friends": [
+    {
+      "user_id": ObjectId("friend_id"),
+      "status": "accepted", // "pending", "requested", "accepted"
+      "since": ISODate("2023-01-05T00:00:00Z")
+    }
+  ],
+  "settings": {
+    "notification_preferences": {},
+    "privacy_settings": {}
+  }
+}
+```
+
+#### Rooms Collection
+```json
+{
+  "_id": ObjectId("room_id"),
+  "name": "Study Room",
+  "description": "Study group for biology",
+  "owner_id": ObjectId("user_id"),
+  "type": "shared", // "personal", "shared"
+  "created_at": ISODate("2023-01-01T00:00:00Z"),
+  "is_active": true,
+  "max_participants": 5,
+  "participants": [
+    {
+      "user_id": ObjectId("user_id"),
+      "role": "owner", // "owner", "moderator", "member"
+      "joined_at": ISODate("2023-01-01T00:00:00Z")
+    }
+  ],
+  "invites": [
+    {
+      "user_id": ObjectId("user_id"),
+      "invited_by": ObjectId("inviter_id"),
+      "created_at": ISODate("2023-01-05T00:00:00Z"),
+      "status": "pending" // "pending", "accepted", "declined"
+    }
+  ],
+  "settings": {
+    "is_private": false,
+    "allow_screen_sharing": true
+  }
+}
+```
+
+#### Sessions Collection
+```json
+{
+  "_id": ObjectId("session_id"),
+  "room_id": ObjectId("room_id"),
+  "user_id": ObjectId("user_id"),
+  "start_time": ISODate("2023-01-01T10:00:00Z"),
+  "end_time": ISODate("2023-01-01T12:00:00Z"),
+  "duration_minutes": 120,
+  "xp_earned": 240,
+  "is_active": false,
+  "inactivity_periods": [
+    {
+      "start": ISODate("2023-01-01T10:30:00Z"),
+      "end": ISODate("2023-01-01T10:35:00Z"),
+      "duration_minutes": 5
+    }
+  ],
+  "pomodoro_completed": 2
+}
+```
+
+#### Materials Collection
+```json
+{
+  "_id": ObjectId("material_id"),
+  "name": "Biology Notes",
+  "description": "Chapter 5 summary",
+  "owner_id": ObjectId("user_id"),
+  "room_id": ObjectId("room_id"),
+  "file_type": "pdf", // "pdf", "word", "figma", "other"
+  "file_url": "https://storage.example.com/files/biology-notes.pdf",
+  "file_size": 1024000, // in bytes
+  "created_at": ISODate("2023-01-01T00:00:00Z"),
+  "shared_with": [
+    {
+      "user_id": ObjectId("user_id"),
+      "permission": "view" // "view", "edit"
+    }
+  ]
+}
+```
+
+#### Todos Collection
+```json
+{
+  "_id": ObjectId("todo_id"),
+  "text": "Complete assignment",
+  "owner_id": ObjectId("user_id"),
+  "room_id": ObjectId("room_id"),
+  "is_shared": true,
+  "assignee_id": ObjectId("assignee_id"),
+  "created_at": ISODate("2023-01-01T00:00:00Z"),
+  "due_date": ISODate("2023-01-10T00:00:00Z"),
+  "is_completed": false,
+  "completed_at": null
+}
+```
+
+#### Notes Collection
+```json
+{
+  "_id": ObjectId("note_id"),
+  "text": "Remember to check references on page 24",
+  "owner_id": ObjectId("user_id"),
+  "room_id": ObjectId("room_id"),
+  "is_shared": true,
+  "created_at": ISODate("2023-01-01T10:30:00Z"),
+  "updated_at": ISODate("2023-01-01T10:30:00Z")
+}
+```
+
+#### RealTimeChannels Collection
+```json
+{
+  "_id": ObjectId("channel_id"),
+  "room_id": ObjectId("room_id"),
+  "type": "video", // "chat", "video"
+  "participants": [
+    {
+      "user_id": ObjectId("user_id"),
+      "joined_at": ISODate("2023-01-01T10:00:00Z"),
+      "left_at": null,
+      "is_screen_sharing": false,
+      "audio_enabled": true,
+      "video_enabled": true
+    }
+  ],
+  "created_at": ISODate("2023-01-01T10:00:00Z"),
+  "ended_at": null,
+  "messages": [
+    {
+      "user_id": ObjectId("user_id"),
+      "text": "Hello everyone",
+      "sent_at": ISODate("2023-01-01T10:05:00Z")
+    }
+  ]
+}
+```
+
+### 3. API Endpoints
+
+#### Auth Service
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - User login, return JWT
+- `POST /api/v1/auth/refresh` - Refresh JWT
+- `GET /api/v1/auth/me` - Get current user profile
+- `PUT /api/v1/auth/me` - Update user profile
+- `GET /api/v1/auth/xp` - Get user XP and level info
+- `GET /api/v1/users/:id` - Get user profile by ID
+- `POST /api/v1/friends/request` - Send friend request
+- `PUT /api/v1/friends/:id/accept` - Accept friend request
+- `PUT /api/v1/friends/:id/reject` - Reject friend request
+- `GET /api/v1/friends` - List friends
+
+#### Room Service
+- `POST /api/v1/rooms` - Create new room
+- `GET /api/v1/rooms` - List user's rooms
+- `GET /api/v1/rooms/:id` - Get room details
+- `PUT /api/v1/rooms/:id` - Update room
+- `DELETE /api/v1/rooms/:id` - Delete room
+- `POST /api/v1/rooms/:id/join` - Join room with invite code
+- `POST /api/v1/rooms/:id/leave` - Leave room
+- `POST /api/v1/rooms/:id/invite` - Invite user to room
+- `GET /api/v1/rooms/:id/participants` - List room participants
+- `PUT /api/v1/rooms/:id/participants/:userId` - Update participant role
+
+#### Session Service
+- `POST /api/v1/sessions/start` - Start study session
+- `PUT /api/v1/sessions/:id/end` - End study session
+- `PUT /api/v1/sessions/:id/ping` - Update activity status
+- `GET /api/v1/sessions/current` - Get current session
+- `GET /api/v1/sessions/history` - Get session history
+- `GET /api/v1/sessions/stats` - Get session statistics
+
+#### Content Service
+- `POST /api/v1/materials` - Upload material
+- `GET /api/v1/materials` - List user's materials
+- `GET /api/v1/rooms/:id/materials` - List room materials
+- `GET /api/v1/materials/:id` - Get material details
+- `PUT /api/v1/materials/:id` - Update material
+- `DELETE /api/v1/materials/:id` - Delete material
+- `PUT /api/v1/materials/:id/share` - Share material with user
+
+- `POST /api/v1/todos` - Create todo
+- `GET /api/v1/todos` - List user's todos
+- `GET /api/v1/rooms/:id/todos` - List room todos
+- `PUT /api/v1/todos/:id` - Update todo
+- `DELETE /api/v1/todos/:id` - Delete todo
+- `PUT /api/v1/todos/:id/complete` - Mark todo as complete
+
+- `POST /api/v1/notes` - Create note
+- `GET /api/v1/notes` - List user's notes
+- `GET /api/v1/rooms/:id/notes` - List room notes
+- `PUT /api/v1/notes/:id` - Update note
+- `DELETE /api/v1/notes/:id` - Delete note
+
+#### Real-time Service
+- WebSocket endpoint: `/ws/rooms/:id`
+- WebRTC signaling: `/ws/rooms/:id/rtc`
+
+### 4. File Storage Architecture
+
+For file storage, we'll use MinIO (an S3-compatible object storage):
+
+1. **Storage Buckets:**
+   - `user-avatars` - For profile pictures
+   - `materials` - For study materials
+   - `temp-uploads` - For temporary storage during uploads
+
+2. **File Processing Flow:**
+   - Client requests a signed upload URL
+   - Client uploads directly to storage
+   - Backend validates and processes the uploaded file
+   - File metadata is stored in MongoDB
+   - Access control is managed through the application
+
+## Security Architecture
+
+### 1. Authentication & Authorization
+
+#### JWT-Based Authentication
+- Short-lived access tokens (15-30 minutes)
+- Longer-lived refresh tokens (7 days)
+- Token rotation on refresh
+- Secure, HTTP-only cookies for token storage
+
+#### Role-Based Access Control
+- Global roles: Admin, User
+- Room-specific roles: Owner, Moderator, Member
+- Permission-based access to resources
+
+### 2. Data Security
+
+#### Data in Transit
+- TLS/SSL for all API communications
+- WSS (WebSockets over SSL) for real-time communications
+
+#### Data at Rest
+- Encrypted database (MongoDB Enterprise encryption)
+- Encrypted file storage (server-side encryption in MinIO)
+- Sensitive data hashing (passwords, etc.)
+
+#### API Security
+- Rate limiting to prevent abuse
+- Input validation and sanitization
+- Protection against common attacks (CSRF, XSS, injection)
+- Security headers (HSTS, CSP, etc.)
+
+### 3. Privacy Considerations
+- Data minimization principles
+- Clear user consent flows
+- Option to delete account and associated data
+- Compliance with relevant privacy regulations
+
+## Deployment Strategy
+
+### 1. Infrastructure Setup
+
+#### Development Environment
+- Local Docker Compose setup
+- MongoDB running in a container
+- MinIO running in a container
+- Go services with hot-reload
+
+#### Staging/Production Environment
+- Kubernetes cluster (managed service like GKE, EKS, or AKS)
+- MongoDB Atlas or self-hosted MongoDB replica set
+- Managed MinIO or S3-compatible storage
+- Separate namespaces for staging and production
+
+### 2. CI/CD Pipeline
+
+#### Continuous Integration
+- Automated testing on every pull request
+- Code quality checks
+- Vulnerability scanning
+
+#### Continuous Deployment
+- Automated builds of Docker images
+- Version tagging
+- Deployment to staging environment
+- Promotion to production after approval
+
+### 3. Scaling Strategy
+
+#### Horizontal Scaling
+- Stateless microservices allow for easy scaling
+- Use of cloud load balancers
+- Auto-scaling based on CPU/memory usage
+
+#### Database Scaling
+- MongoDB sharding for horizontal scaling
+- Read replicas for read-heavy services
+
+#### Caching Layer
+- Redis for caching frequently accessed data
+- Distributed caching for session data
+
+### 4. Monitoring and Observability
+
+#### Logging
+- Structured logging with correlation IDs
+- Centralized log collection (ELK stack or cloud equivalent)
+
+#### Metrics
+- Prometheus for metrics collection
+- Grafana for dashboards
+- Service-level objectives (SLOs) and alerts
+
+#### Tracing
+- Distributed tracing with OpenTelemetry
+- Performance monitoring and bottleneck identification
+
+#### Health Checks
+- Readiness and liveness probes for Kubernetes
+- Service health dashboards
+
+## Implementation Roadmap
+
+### Phase 1: Core Infrastructure
+- Set up Go project structure with microservices architecture
+- Implement database models and connections
+- Set up authentication system
+- Create basic user management APIs
+
+### Phase 2: Study Room Features
+- Implement room creation and management
+- Develop session tracking system
+- Build XP system and level progression
+- Create materials management APIs
+
+### Phase 3: Real-time Features
+- Implement WebSocket server for real-time updates
+- Develop chat functionality
+- Set up WebRTC signaling for video calls
+- Integrate screen sharing capabilities
+
+### Phase 4: Advanced Features & Optimization
+- Implement analytics and reporting
+- Optimize performance
+- Add advanced features (pomodoro timer, etc.)
+- Enhance security measures
+
+### Phase 5: Testing, Documentation & Deployment
+- Comprehensive testing (unit, integration, e2e)
+- Create API documentation
+- Set up monitoring and alerting
+- Prepare production deployment
+
+## Conclusion
+
+This architecture provides a robust foundation for the Study Platform backend using Go and MongoDB. The microservices approach allows for scalability and maintainability, while the security measures ensure user data protection. The deployment strategy enables continuous delivery and reliable operation in production.
+
+By following this architecture, you can build a performant, secure, and scalable backend that supports all the features showcased in the frontend application. 

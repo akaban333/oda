@@ -1,0 +1,60 @@
+import React, { useEffect, useRef } from 'react';
+
+const ContactPanel = ({ isOpen, onClose }) => {
+  const panelRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (panelRef.current && !panelRef.current.contains(event.target) && isOpen) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[90]" onClick={onClose}></div>
+
+      {/* Contact panel */}
+      <div className="fixed inset-0 flex items-center justify-center z-[100]">
+        <div 
+          ref={panelRef}
+          className="w-[600px] bg-[#1a1b3b] rounded-lg relative overflow-hidden"
+        >
+          {/* Glowing border effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#ffe993] via-[#e8c56b] to-[#ffe993] opacity-20"></div>
+          <div className="absolute inset-[1px] bg-[#1a1b3b] rounded-lg"></div>
+
+          {/* Close button */}
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 text-[#ffe993] hover:text-[#e8c56b] transition-colors z-10"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Content */}
+          <div className="relative p-8 font-['Montserrat']">
+            <h2 className="text-[#ffe993] text-2xl mb-6 text-center pt-4">Contact Us</h2>
+            <div className="text-[#ffe993] text-sm space-y-4">
+              {/* Content will be added later */}
+              <p>Contact information goes here...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default ContactPanel; 

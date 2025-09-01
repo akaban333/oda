@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+      - minio
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DATABASE=studyplatform
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_USE_SSL=false
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+      - JWT_SECRET=your_jwt_secret_key
+      - JWT_ACCESS_EXPIRY=15m
+      - JWT_REFRESH_EXPIRY=7d
+      - LOG_LEVEL=debug
+      - ENV=development
+    volumes:
+      - ./:/app
+    restart: unless-stopped
+    networks:
+      - studyplatform-network
+
+  # MongoDB
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=studyplatform
+    restart: unless-stopped
+    networks:
+      - studyplatform-network
+
+  # MinIO (S3-compatible storage)
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    networks:
+      - studyplatform-network
+
+  # Create MinIO buckets
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/avatars;
+      /usr/bin/mc mb myminio/materials;
+      /usr/bin/mc mb myminio/temp;
+      /usr/bin/mc policy set public myminio/avatars;
+      /usr/bin/mc policy set public myminio/materials;
+      exit 0;
+      "
+    networks:
+      - studyplatform-network
+
+volumes:
+  mongodb-data:
+  minio-data:
+
+networks:
+  studyplatform-network:
+    driver: bridge 

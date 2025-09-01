@@ -1,0 +1,440 @@
+# Backend Integration Points
+
+## Project Overview
+
+### Project Structure
+- **Frontend Framework**: React.js (using React 19.0.0)
+- **Styling**: Tailwind CSS with custom styling
+- **Animation Libraries**: Framer Motion, Lottie animations
+- **Icons**: Iconify React
+
+### Key Files and Directories:
+- **React Components**: Located in `src/components/`
+- **Application Entry Point**: `src/index.js` and `src/App.js` 
+- **Styling**: Using Tailwind CSS with custom styles in `src/styles.css`
+
+### Main Components:
+1. **App.js**: Main application component with authentication state
+2. **LandingPage.js**: Initial page shown to non-authenticated users
+3. **HomePage.js**: Main application interface for authenticated users with tab-based navigation
+4. **ProfileSection.js**: User profile management
+5. **SocialFeed.js**: Social media feed for user interactions
+6. **RoomsInterface.js**: Interface for study room functionality 
+
+### Application Flow:
+- The app starts at `LandingPage` for non-authenticated users
+- After authentication, users are directed to `HomePage`
+- `HomePage` has a tab-based interface with three main sections:
+  - Social feed
+  - Rooms interface
+  - User profile
+
+### UI Theme:
+- A unique retro/pixel art UI with custom cursor effects
+- Color scheme based on purples, blues and gold accents
+- Grid background with custom styling for depth
+- Hover-based navigation for tab selection
+
+## SocialFeed Component
+
+1. **Posts Data**
+   - Description: Main posts displayed in the feed
+   - Current Implementation: Mock data in the component
+   - Backend Integration: Will fetch posts from backend API
+   - Data Structure: Array of post objects with id, username, userid, content, timestamp, and comments
+
+2. **Comments Data**
+   - Description: Comments on posts
+   - Current Implementation: Mock data within post objects
+   - Backend Integration: Will fetch comments for each post
+   - Data Structure: Array of comment objects with id, username, userid, and content
+
+3. **Like Functionality**
+   - Description: Ability to like posts and comments
+   - Current Implementation: Local state management
+   - Backend Integration: Will send like/unlike requests to backend
+   - API Endpoints Needed: POST/DELETE for likes on posts and comments
+
+4. **Comment Submission**
+   - Description: Ability to add comments to posts
+   - Current Implementation: Local state update
+   - Backend Integration: Will send new comments to backend
+   - API Endpoints Needed: POST for creating new comments
+
+5. **Post Creation**
+   - Description: Ability to create new posts
+   - Current Implementation: Local state update
+   - Backend Integration: Will send new posts to backend
+   - API Endpoints Needed: POST for creating new posts
+
+6. **Friend Search**
+   - Description: Search for users by ID to add as friends
+   - Current Implementation: Local state update
+   - Backend Integration: Will query backend for user search
+   - API Endpoints Needed: GET with search parameters
+
+7. **Notifications**
+   - Description: User notifications for likes, comments, and invites
+   - Current Implementation: Mock data in the component
+   - Backend Integration: Will fetch notifications from backend
+   - Data Structure: Array of notification objects with id, type, text, and targetId
+
+## ProfileSection Component
+
+1. **User Profile Data**
+   - Description: User's profile information
+   - Current Implementation: Hardcoded values
+   - Backend Integration: Will fetch user profile from backend
+   - Data Structure: User object with username, userid, field, bio, etc.
+
+2. **Sessions Count**
+   - Description: Number of study sessions completed
+   - Current Implementation: Mock value (36)
+   - Backend Integration: Will fetch from backend
+   - API Endpoints Needed: GET user statistics
+
+3. **XP (Experience Points)**
+   - Description: User's accumulated XP
+   - Current Implementation: Mock value (2300)
+   - Backend Integration: Will fetch from backend
+   - API Endpoints Needed: GET user statistics
+
+4. **Friends Count**
+   - Description: Number of friends
+   - Current Implementation: Mock value (21)
+   - Backend Integration: Will fetch from backend
+   - API Endpoints Needed: GET user statistics
+
+5. **Friends Data**
+   - Description: List of friends and friend requests
+   - Current Implementation: Mock data in the component
+   - Backend Integration: Will fetch friends list from backend
+   - Data Structure: Object with added and received friend requests
+
+6. **Recent Activity**
+   - Description: User's recent activities
+   - Current Implementation: Hardcoded activities
+   - Backend Integration: Will fetch from backend
+   - API Endpoints Needed: GET user activities
+
+## ProgressGraph Component
+
+1. **Progress Data**
+   - Description: User's progress data for visualization
+   - Current Implementation: Mock data
+   - Backend Integration: Will fetch from backend
+   - API Endpoints Needed: GET user progress statistics
+   - Data Structure: Time series data for sessions and XP
+
+## PostsPanel Component
+
+1. **User Posts**
+   - Description: Collection of user's posts
+   - Current Implementation: Mock posts data
+   - Backend Integration: Will fetch from backend
+   - API Endpoints Needed: GET user posts
+   - Data Structure: Array of post objects
+
+## BadgesSection Component
+
+1. **User Badges**
+   - Description: Badges earned by the user
+   - Current Implementation: Generated based on sessions count
+   - Backend Integration: Will fetch from backend
+   - API Endpoints Needed: GET user badges
+   - Data Structure: Array of badge objects with name, description, and status
+
+## LoginPanel Component
+
+1. **Authentication**
+   - Description: User login functionality
+   - Current Implementation: Mock authentication
+   - Backend Integration: Will authenticate with backend
+   - API Endpoints Needed: POST login credentials
+   - Data Structure: Email and password sent, JWT token received
+
+## HomePage Component
+
+1. **Authentication State**
+   - Description: User's authentication state
+   - Current Implementation: Local state
+   - Backend Integration: Will verify authentication with backend
+   - API Endpoints Needed: GET user session validation
+
+## RoomsInterface Component
+
+1. **User Room Materials**
+   - Description: User's saved study materials
+   - Current Implementation: Mock data in the component
+   - Backend Integration: Will fetch materials from backend
+   - Data Structure: Array of material objects with id, type, name, and content
+
+2. **Pomodoro Timer**
+   - Description: Timer for work and break sessions
+   - Current Implementation: Local UI only
+   - Backend Integration: Will save timer preferences and session history
+   - API Endpoints Needed: GET/POST timer preferences, POST session data
+
+3. **To-Do List**
+   - Description: User's task list for study sessions
+   - Current Implementation: UI mockup with sample tasks
+   - Backend Integration: Will fetch and update tasks from/to backend
+   - API Endpoints Needed: GET/POST/PUT/DELETE tasks
+   - Data Structure: Array of task objects with id, content, and completion status
+
+4. **Notes**
+   - Description: User's study notes
+   - Current Implementation: UI mockup with sample notes
+   - Backend Integration: Will fetch and save notes from/to backend
+   - API Endpoints Needed: GET/POST/DELETE notes
+   - Data Structure: Array of note objects with id, content, and timestamp
+
+5. **Video/Voice Call**
+   - Description: Real-time communication with other users
+   - Current Implementation: UI mockup
+   - Backend Integration: Will use WebRTC with signaling server
+   - API Endpoints Needed: WebSocket for signaling, POST for session creation
+   
+6. **Chat Messaging**
+   - Description: Text messaging during video/voice calls
+   - Current Implementation: UI mockup with sample messages
+   - Backend Integration: Will use WebSocket for real-time messaging
+   - API Endpoints Needed: WebSocket for message exchange, GET for chat history
+   - Data Structure: Array of message objects with id, sender, content, and timestamp
+
+7. **Room Sharing**
+   - Description: Ability to join other users' rooms
+   - Current Implementation: UI mockup with link input
+   - Backend Integration: Will validate room links and authorize access
+   - API Endpoints Needed: GET room validation, POST room join requests
+   - Data Structure: Room objects with id, owner, participants, and materials
+
+## Summary of Backend API Requirements
+
+1. **Authentication API**
+   - Login
+   - Logout
+   - Register
+   - Password reset
+
+2. **User API**
+   - Get user profile
+   - Update user profile
+   - Get user statistics (sessions, XP, friends count)
+   - Get user activities
+   - Get user progress
+   - Get user badges
+
+3. **Social API**
+   - Get posts
+   - Create post
+   - Like/unlike post
+   - Get comments
+   - Create comment
+   - Like/unlike comment
+   - Search users
+   - Send friend request
+   - Accept/reject friend request
+   - Get notifications
+
+4. **Study API**
+   - Get study rooms
+   - Create study room
+   - Join study room
+   - Leave study room
+   - Get session history
+   - Get/update timer preferences
+   - Get/create/update/delete tasks
+   - Get/create/delete notes
+   - Get/upload/delete materials
+   - Create/manage room sharing links
+   - WebSocket for real-time communication 
+
+## Additional Backend Integration Points
+
+### EditProfileModal Component
+
+1. **Profile Update**
+   - Description: Update user profile information
+   - Current Implementation: UI form only, no data persistence
+   - Backend Integration: Will send updated profile to backend
+   - API Endpoints Needed: PUT user profile
+   - Data Structure: Object with username, email, password, profile picture URL, major
+
+### Navbar Component
+
+1. **Information Panels Data**
+   - Description: Content for About, Purpose, FAQ, and Contact panels
+   - Current Implementation: Static content in components
+   - Backend Integration: Could fetch from backend for easy updates
+   - API Endpoints Needed: GET content for each panel
+
+### LandingPage Component
+
+1. **Authentication State Persistence**
+   - Description: Remember user login state
+   - Current Implementation: Local state only
+   - Backend Integration: Will validate auth tokens with backend
+   - API Endpoints Needed: GET token validation
+
+### User Registration
+
+1. **User Registration**
+   - Description: New user registration functionality 
+   - Current Implementation: UI form in LoginPanel
+   - Backend Integration: Will send registration data to backend
+   - API Endpoints Needed: POST user registration
+   - Data Structure: Object with username, email, password, other profile information
+
+2. **Email Verification**
+   - Description: Verify user email during registration
+   - Current Implementation: Not implemented
+   - Backend Integration: Will require email verification API
+   - API Endpoints Needed: POST verification request, GET verification status
+
+### Additional Security Requirements
+
+1. **JWT Token Management**
+   - Description: Management of authentication tokens
+   - Current Implementation: Simple state-based auth
+   - Backend Integration: Will require JWT handling
+   - Requirements: Token refresh, token revocation, secure storage
+
+2. **Rate Limiting**
+   - Description: Prevent abuse of API endpoints
+   - Current Implementation: Not implemented
+   - Backend Integration: Will require rate limiting on backend
+   - Affected Endpoints: Login, registration, search functions
+
+### Additional Web Socket Requirements
+
+1. **Online Status**
+   - Description: Track user online status
+   - Current Implementation: Not implemented
+   - Backend Integration: Will use WebSocket for real-time status updates
+   - API Endpoints Needed: WebSocket for status updates
+
+2. **Typing Indicators**
+   - Description: Show when users are typing in chat
+   - Current Implementation: Not implemented
+   - Backend Integration: Will use WebSocket for typing indicators
+   - API Endpoints Needed: WebSocket for typing events
+
+### Door Component and SignupModal
+
+1. **Signup Functionality**
+   - Description: User registration through door interaction
+   - Current Implementation: Multi-step form with email verification
+   - Backend Integration: Will send registration data to backend and verify email
+   - API Endpoints Needed: POST for registration data, POST for email verification
+   - Data Structure: Object with username, email, password, major, and verification status
+
+### XP System
+
+1. **Session XP Calculation**
+   - Description: Earning XP from active study sessions
+   - Current Implementation: 2 XP per minute for active sessions, 30 XP per completed Pomodoro timer
+   - Backend Integration: Will send session data and XP earned to backend
+   - API Endpoints Needed: POST session data with duration and activity metrics
+   - Data Structure: Object with session start/end times, XP earned, and activity timestamps
+
+2. **Inactivity Detection**
+   - Description: Terminate sessions after 10 minutes of inactivity
+   - Current Implementation: Client-side activity tracking with mouse/keyboard events
+   - Backend Integration: Will notify backend of session termination due to inactivity
+   - API Endpoints Needed: PUT for updating session status
+   - Data Structure: Object with session ID and termination reason
+
+3. **XP-Based Privileges**
+   - Description: Unlock features based on accumulated XP
+   - Current Implementation: UI implementation for showing XP requirements
+   - Backend Integration: Will verify XP thresholds for feature unlocks
+   - API Endpoints Needed: GET for XP-based permissions
+   - Specific XP Rules:
+     - 300 XP needed to add a 5th person to shared room (incremental by 300 XP per additional person)
+     - 1000 XP needed to create another shared room
+   
+4. **XP History**
+   - Description: Track and display XP earning history
+   - Current Implementation: Display current session XP
+   - Backend Integration: Will store and retrieve XP history
+   - API Endpoints Needed: GET for XP history
+   - Data Structure: Array of XP earning events with source, amount, and timestamp
+
+### Shared Rooms Materials Access
+
+1. **Materials Accessibility**
+   - Description: Accessing host's materials in shared rooms
+   - Current Implementation: UI for showing shared materials panel
+   - Backend Integration: Will fetch and manage material access permissions
+   - API Endpoints Needed: GET for shared materials with access rights
+   - Data Structure: Array of material objects with access permissions
+
+2. **Access Control**
+   - Description: Room owner controls for materials access
+   - Current Implementation: UI toggles for view/modify permissions
+   - Backend Integration: Will store and enforce permission settings
+   - API Endpoints Needed: PUT for updating access permissions
+   - Data Structure: Object with material IDs and permission levels (view/modify)
+
+## Extended Backend API Requirements
+
+The existing backend API requirements should be expanded to include:
+
+1. **Content API**
+   - Get/update information panels content
+   - Set visibility of features/sections
+   - Update site-wide announcements
+   
+2. **Security API**
+   - Token validation
+   - Token refresh
+   - Account lockout management
+   - Two-factor authentication (future enhancement)
+
+3. **Analytics API**
+   - Track user engagement 
+   - Record feature usage
+   - Session duration metrics
+   - Performance monitoring
+
+4. **XP and Progression API**
+   - Track XP accumulation
+   - Validate feature unlocks based on XP thresholds
+   - Store session history with XP earned
+   - Track user progression and leveling
+
+5. **Shared Materials API**
+   - Manage access controls for shared materials
+   - Track material usage in shared sessions
+   - Handle multi-user access to the same material
+
+## Implementation Notes
+
+### Technical Considerations
+1. The frontend uses the latest React version (19.0.0) which may require consideration for backend compatibility.
+2. The UI has custom animations and transitions that may require coordination with backend state changes.
+3. Real-time features (chat, room sharing) will require WebSocket implementation.
+
+### Data Flow Considerations
+1. Authentication should be implemented using JWT tokens with proper expiration and refresh mechanisms.
+2. Social features should implement proper pagination for performance.
+3. File uploads for study materials should implement proper validation and security measures.
+4. Real-time synchronization will be critical for the collaborative study room features.
+
+### Security Considerations
+1. All API endpoints should implement proper authorization checks.
+2. User data should be properly sanitized both on frontend and backend.
+3. Rate limiting should be implemented for authentication endpoints.
+4. Proper CORS configuration will be necessary.
+
+### XP System Implementation
+1. Sessions should track user activity to verify XP earning (prevent abuse)
+2. XP calculations should happen server-side after validating client activity data
+3. A historical record of XP transactions should be maintained for auditing and analytics
+4. The XP thresholds for unlocking features should be configurable by administrators
+
+### Shared Room Implementation
+1. Real-time access control changes should be propagated to all users in a room
+2. Materials should be loaded with appropriate access restrictions
+3. The system should handle cases where the room owner disconnects or changes permissions mid-session 
