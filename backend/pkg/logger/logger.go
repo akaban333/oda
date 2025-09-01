@@ -121,4 +121,4 @@ func Close() {
 	if log != nil {
 		_ = log.Sync()
 	}
-} 
+}

@@ -13,9 +13,13 @@ import (
 type ErrorSeverity string
 
 const (
-	SeverityLow      ErrorSeverity = "low"
-	SeverityMedium   ErrorSeverity = "medium"
-	SeverityHigh     ErrorSeverity = "high"
+	// SeverityLow represents a low severity error
+	SeverityLow ErrorSeverity = "low"
+	// SeverityMedium represents a medium severity error
+	SeverityMedium ErrorSeverity = "medium"
+	// SeverityHigh represents a high severity error
+	SeverityHigh ErrorSeverity = "high"
+	// SeverityCritical represents a critical severity error
 	SeverityCritical ErrorSeverity = "critical"
 )
 
@@ -23,13 +27,20 @@ const (
 type ErrorCategory string
 
 const (
-	CategoryDatabase       ErrorCategory = "database"
+	// CategoryDatabase represents database-related errors
+	CategoryDatabase ErrorCategory = "database"
+	// CategoryAuthentication represents authentication-related errors
 	CategoryAuthentication ErrorCategory = "authentication"
-	CategoryValidation     ErrorCategory = "validation"
-	CategoryNetwork        ErrorCategory = "network"
-	CategorySystem         ErrorCategory = "system"
-	CategoryBusiness       ErrorCategory = "business"
-	CategoryUnknown        ErrorCategory = "unknown"
+	// CategoryValidation represents validation-related errors
+	CategoryValidation ErrorCategory = "validation"
+	// CategoryNetwork represents network-related errors
+	CategoryNetwork ErrorCategory = "network"
+	// CategorySystem represents system-related errors
+	CategorySystem ErrorCategory = "system"
+	// CategoryBusiness represents business logic errors
+	CategoryBusiness ErrorCategory = "business"
+	// CategoryUnknown represents unknown error categories
+	CategoryUnknown ErrorCategory = "unknown"
 )
 
 // TrackedError represents a tracked error with metadata

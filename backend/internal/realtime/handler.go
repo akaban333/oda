@@ -36,7 +36,7 @@ const (
 	MessageTypeCallDeclined = "call_declined"
 )
 
-// WebSocket message structure
+// WSMessage represents a WebSocket message structure
 type WSMessage struct {
 	Type      string                 `json:"type"`
 	RoomID    string                 `json:"roomId,omitempty"`
