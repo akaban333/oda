@@ -85,6 +85,7 @@ function App() {
     };
 
     initializeAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handler for successful login

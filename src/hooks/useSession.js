@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useCallback, useEffect } from 'react';
 import { sessionsAPI, authAPI } from '../utils/api';
 

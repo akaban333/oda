@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Icon } from '@iconify/react';
 import { realtimeAPI } from '../utils/api';

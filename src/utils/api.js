@@ -400,7 +400,7 @@ export const testBackendConnectivity = async () => {
   }
 };
 
-export default {
+const api = {
   auth: authAPI,
   rooms: roomsAPI,
   sessions: sessionsAPI,
@@ -412,4 +412,6 @@ export default {
   posts: postsAPI,
   notifications: notificationsAPI,
   realtime: realtimeAPI
-}; 
+};
+
+export default api; 

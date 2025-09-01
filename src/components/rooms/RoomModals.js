@@ -887,7 +887,7 @@ RoomModals.propTypes = {
   friendsList: PropTypes.array.isRequired,
   inviteFriendToRoom: PropTypes.func.isRequired,
   userRooms: PropTypes.array.isRequired,
-  userXP: PropTypes.number.isRequired,
+  // userXP is already defined above
   
   // Notifications Modal
   showNotifications: PropTypes.bool.isRequired,
