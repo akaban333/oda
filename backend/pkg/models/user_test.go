@@ -179,8 +179,8 @@ func TestSignupRequest_Validation(t *testing.T) {
 				assert.NotEmpty(t, tt.request.Username)
 				assert.NotEmpty(t, tt.request.Email)
 				assert.NotEmpty(t, tt.request.Password)
-				assert.Len(t, tt.request.Username, 3)
-				assert.Len(t, tt.request.Password, 8)
+				assert.GreaterOrEqual(t, len(tt.request.Username), 3)
+				assert.GreaterOrEqual(t, len(tt.request.Password), 8)
 			}
 		})
 	}

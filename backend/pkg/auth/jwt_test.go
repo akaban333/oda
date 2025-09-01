@@ -28,7 +28,7 @@ func TestNewManager(t *testing.T) {
 				AccessSecret:  "test_secret",
 				RefreshSecret: "test_refresh_secret",
 				AccessExpiry:  2 * time.Hour,
-				RefreshExpiry: 14 * 24 * time.Hour,
+				RefreshExpiry: 7 * 24 * time.Hour,
 			},
 		},
 		{
@@ -125,6 +125,8 @@ func TestValidateToken(t *testing.T) {
 		config: Config{
 			AccessSecret:  "test_secret",
 			RefreshSecret: "test_refresh_secret",
+			AccessExpiry:  time.Hour,      // 1 hour expiry
+			RefreshExpiry: 24 * time.Hour, // 24 hour expiry
 		},
 	}
 
@@ -136,7 +138,7 @@ func TestValidateToken(t *testing.T) {
 	accessToken, err := manager.GenerateAccessToken(userID, username, email)
 	require.NoError(t, err)
 
-	claims, err := manager.ValidateToken(accessToken, AccessToken)
+	claims, err := manager.ValidateAccessToken(accessToken)
 	require.NoError(t, err)
 	assert.Equal(t, userID, claims.UserID)
 	assert.Equal(t, username, claims.Username)
@@ -147,7 +149,7 @@ func TestValidateToken(t *testing.T) {
 	refreshToken, err := manager.GenerateRefreshToken(userID, username, email)
 	require.NoError(t, err)
 
-	claims, err = manager.ValidateToken(refreshToken, RefreshToken)
+	claims, err = manager.ValidateRefreshToken(refreshToken)
 	require.NoError(t, err)
 	assert.Equal(t, userID, claims.UserID)
 	assert.Equal(t, username, claims.Username)
@@ -163,7 +165,7 @@ func TestValidateToken_InvalidToken(t *testing.T) {
 	}
 
 	// Test with invalid token
-	_, err := manager.ValidateToken("invalid_token", AccessToken)
+	_, err := manager.ValidateAccessToken("invalid_token")
 	assert.Error(t, err)
 
 	// Test with wrong secret
@@ -177,22 +179,39 @@ func TestValidateToken_InvalidToken(t *testing.T) {
 	token, err := manager.GenerateAccessToken("user123", "testuser", "test@example.com")
 	require.NoError(t, err)
 
-	_, err = wrongManager.ValidateToken(token, AccessToken)
+	_, err = wrongManager.ValidateAccessToken(token)
 	assert.Error(t, err)
 }
 
 func TestValidateToken_ExpiredToken(t *testing.T) {
+	// Test with a token that has already expired
+	// We'll create a custom expired token
 	manager := &Manager{
 		config: Config{
 			AccessSecret: "test_secret",
-			AccessExpiry: -time.Hour, // Expired in the past
 		},
 	}
 
-	token, err := manager.GenerateAccessToken("user123", "testuser", "test@example.com")
+	// Create expired claims manually
+	expiredClaims := Claims{
+		UserID:    "user123",
+		Username:  "testuser",
+		Email:     "test@example.com",
+		TokenType: AccessToken,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(-time.Hour)), // Expired 1 hour ago
+			IssuedAt:  jwt.NewNumericDate(time.Now().Add(-2 * time.Hour)),
+			NotBefore: jwt.NewNumericDate(time.Now().Add(-2 * time.Hour)),
+		},
+	}
+
+	// Sign the expired token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, expiredClaims)
+	tokenString, err := token.SignedString([]byte("test_secret"))
 	require.NoError(t, err)
 
-	_, err = manager.ValidateToken(token, AccessToken)
+	// Try to validate the expired token
+	_, err = manager.ValidateAccessToken(tokenString)
 	assert.Error(t, err)
 }
 

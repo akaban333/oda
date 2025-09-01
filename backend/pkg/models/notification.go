@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -174,7 +175,7 @@ func CreateXPLevelUpNotification(userID string, newLevel int) Notification {
 		UserID:    userID,
 		Type:      NotificationTypeXPLevelUp,
 		Title:     "Level Up!",
-		Message:   "Congratulations! You've reached level " + string(newLevel),
+		Message:   "Congratulations! You've reached level " + strconv.Itoa(newLevel),
 		IsRead:    false,
 		CreatedAt: time.Now(),
 		Data: map[string]interface{}{

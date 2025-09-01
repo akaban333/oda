@@ -48,11 +48,11 @@ func TestCheckPassword(t *testing.T) {
 	require.NoError(t, err)
 
 	// Test correct password
-	err = CheckPassword(password, hash)
+	err = ComparePassword(hash, password)
 	assert.NoError(t, err)
 
 	// Test incorrect password
-	err = CheckPassword("wrongPassword", hash)
+	err = ComparePassword(hash, "wrongPassword")
 	assert.Error(t, err)
 }
 
@@ -62,11 +62,11 @@ func TestCheckPassword_EmptyPassword(t *testing.T) {
 	require.NoError(t, err)
 
 	// Test correct empty password
-	err = CheckPassword(password, hash)
+	err = ComparePassword(hash, password)
 	assert.NoError(t, err)
 
 	// Test non-empty password against empty password hash
-	err = CheckPassword("somePassword", hash)
+	err = ComparePassword(hash, "somePassword")
 	assert.Error(t, err)
 }
 
@@ -74,15 +74,15 @@ func TestCheckPassword_InvalidHash(t *testing.T) {
 	password := "testPassword123"
 
 	// Test with invalid hash
-	err := CheckPassword(password, "invalid_hash")
+	err := ComparePassword("invalid_hash", password)
 	assert.Error(t, err)
 
 	// Test with empty hash
-	err = CheckPassword(password, "")
+	err = ComparePassword("", password)
 	assert.Error(t, err)
 
 	// Test with malformed hash
-	err = CheckPassword(password, "not_a_bcrypt_hash")
+	err = ComparePassword("not_a_bcrypt_hash", password)
 	assert.Error(t, err)
 }
 
@@ -100,10 +100,10 @@ func TestPasswordHashing_Consistency(t *testing.T) {
 	assert.NotEqual(t, hash1, hash2)
 
 	// But both should verify correctly
-	err = CheckPassword(password, hash1)
+	err = ComparePassword(hash1, password)
 	assert.NoError(t, err)
 
-	err = CheckPassword(password, hash2)
+	err = ComparePassword(hash2, password)
 	assert.NoError(t, err)
 }
 
@@ -116,21 +116,18 @@ func TestPasswordHashing_Performance(t *testing.T) {
 	require.NotEmpty(t, hash)
 
 	// Verify the hash works
-	err = CheckPassword(password, hash)
+	err = ComparePassword(hash, password)
 	assert.NoError(t, err)
 }
 
 func TestPasswordVerification_EdgeCases(t *testing.T) {
-	// Test very long password
-	longPassword := string(make([]byte, 1000))
-	for i := range longPassword {
-		longPassword = string(append([]byte(longPassword), byte(i%256)))
-	}
+	// Test long password (but within bcrypt limits)
+	longPassword := "this_is_a_reasonable_length_password_for_testing"
 
 	hash, err := HashPassword(longPassword)
 	require.NoError(t, err)
 
-	err = CheckPassword(longPassword, hash)
+	err = ComparePassword(hash, longPassword)
 	assert.NoError(t, err)
 
 	// Test password with null bytes
@@ -138,6 +135,6 @@ func TestPasswordVerification_EdgeCases(t *testing.T) {
 	hash, err = HashPassword(nullPassword)
 	require.NoError(t, err)
 
-	err = CheckPassword(nullPassword, hash)
+	err = ComparePassword(hash, nullPassword)
 	assert.NoError(t, err)
 }
