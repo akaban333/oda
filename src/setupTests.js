@@ -4,6 +4,24 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
+// Manually mock @iconify/react
+jest.mock('@iconify/react', () => ({
+  Icon: ({ icon, ...props }) => {
+    const React = require('react');
+    return React.createElement('span', {
+      'data-testid': 'icon',
+      'data-icon': icon,
+      ...props,
+    });
+  },
+  addIcon: () => {},
+  addCollection: () => {},
+  addIconify: () => {},
+  getIcon: () => null,
+  listIcons: () => [],
+  searchIcons: () => {},
+}));
+
 // Mock IntersectionObserver for components that use it
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}
