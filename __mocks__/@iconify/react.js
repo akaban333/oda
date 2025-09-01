@@ -15,7 +15,7 @@ export const addCollection = () => {};
 export const addIconify = () => {};
 export const getIcon = () => null;
 export const listIcons = () => [];
-export const searchIcons = () => [];
+export const searchIcons = () => {};
 
 // Mock default export
 export default Icon; 

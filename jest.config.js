@@ -2,17 +2,16 @@ module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
   moduleNameMapper: {
-    // Handle ES modules
-    '^@iconify/react$': '<rootDir>/src/__mocks__/iconifyMock.js',
     // Handle CSS imports
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     // Handle image imports
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/src/__mocks__/fileMock.js',
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(@iconify|@babel|@testing-library)/)',
-  ],
+  // Enable automatic mocking
+  automock: false,
+  // Mock modules automatically
+  setupFiles: ['<rootDir>/src/setupTests.js'],
   collectCoverageFrom: [
     'src/**/*.{js,jsx}',
     '!src/index.js',
