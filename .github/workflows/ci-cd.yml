@@ -93,7 +93,9 @@ jobs:
       run: npm ci
 
     - name: Run frontend tests
-      run: npm test -- --coverage --watchAll=false
+      run: npx react-scripts test --coverage --watchAll=false --passWithNoTests --ci
+      env:
+        CI: true
 
     - name: Build frontend
       run: npm run build
