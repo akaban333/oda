@@ -28,38 +28,23 @@ const LoginPanel = ({ isOpen, onClose, onLogin }) => {
     setLoading(true);
     
     try {
-      const response = await fetch("http://localhost:8080/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const data = await authAPI.login(email, password);
       
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Store tokens
-        localStorage.setItem("accessToken", data.accessToken);
-        if (data.refreshToken) {
-          localStorage.setItem("refreshToken", data.refreshToken);
-        }
-        
-        // Store user data
-        localStorage.setItem("user", JSON.stringify(data.user));
-        
-        if (onLogin) {
-
-          onLogin(data.user);
-        }
-      } else {
-        const data = await response.json();
-        setError(data.error || "Login failed");
+      // Store tokens
+      localStorage.setItem("accessToken", data.accessToken);
+      if (data.refreshToken) {
+        localStorage.setItem("refreshToken", data.refreshToken);
+      }
+      
+      // Store user data
+      localStorage.setItem("user", JSON.stringify(data.user));
+      
+      if (onLogin) {
+        onLogin(data.user);
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError("Network error. Please try again.");
+      setError(err.message || "Network error. Please try again.");
     } finally {
       setLoading(false);
     }

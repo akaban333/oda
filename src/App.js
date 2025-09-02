@@ -42,26 +42,20 @@ function App() {
       // If token is expired, try to refresh
       if (refreshToken && error.message.includes('401')) {
         try {
-          const response = await fetch('http://localhost:8080/api/v1/auth/refresh', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refreshToken })
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            localStorage.setItem("accessToken", data.accessToken);
-            if (data.refreshToken) {
-              localStorage.setItem("refreshToken", data.refreshToken);
-            }
-            
-            const userProfile = await fetchUserProfile();
-            setUser(userProfile);
-            setIsAuthenticated(true);
-            return true;
+          const data = await authAPI.refreshToken(refreshToken);
+          localStorage.setItem("accessToken", data.accessToken);
+          if (data.refreshToken) {
+            localStorage.setItem("refreshToken", data.refreshToken);
           }
+          return true;
         } catch (refreshError) {
           console.error('Token refresh failed:', refreshError);
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+          setIsAuthenticated(false);
+          setUser(null);
+          return false;
         }
       }
       

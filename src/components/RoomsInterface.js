@@ -1018,7 +1018,7 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
       const token = localStorage.getItem('token');
       
       // Create WebSocket connection
-      const wsUrl = `ws://localhost:8080/api/v1/realtime/ws?roomId=${roomId}`;
+      const wsUrl = `${process.env.REACT_APP_WS_BASE_URL || 'wss://oda-production-de1e.up.railway.app/api/v1'}/realtime/ws?roomId=${roomId}`;
       const ws = new WebSocket(wsUrl);
       
       // Set up connection handler

@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import { authAPI } from '../utils/api';
 
 const SignupModal = ({ isOpen = true, onClose = () => {}, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -67,14 +68,10 @@ const SignupModal = ({ isOpen = true, onClose = () => {}, onSuccess }) => {
     if (validateForm()) {
 
       try {
-        const response = await fetch('http://localhost:8080/api/v1/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: formData.username,
-            email: formData.email,
-            password: formData.password
-          })
+        const response = await authAPI.register({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
         });
 
         if (response.status === 201) {
@@ -84,7 +81,7 @@ const SignupModal = ({ isOpen = true, onClose = () => {}, onSuccess }) => {
             else onClose();
           }, 2000);
         } else {
-          const data = await response.json();
+          const data = response.data;
           setServerError(data.error || 'Registration failed');
           console.error('Registration error:', data.error);
         }
