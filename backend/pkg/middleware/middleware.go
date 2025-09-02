@@ -33,9 +33,13 @@ func CORS() gin.HandlerFunc {
 		allowedOrigins = []string{"http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"} // Default values
 	}
 
+	// Log the allowed origins for debugging
+	logger.Info("CORS Configuration", logger.Field("allowedOrigins", allowedOrigins))
+
 	// Handle wildcard for all origins
 	var corsConfig cors.Config
 	if len(allowedOrigins) == 1 && allowedOrigins[0] == "*" {
+		logger.Info("Using wildcard CORS configuration")
 		corsConfig = cors.Config{
 			AllowAllOrigins:  true,
 			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"},
@@ -45,6 +49,7 @@ func CORS() gin.HandlerFunc {
 			MaxAge:           12 * time.Hour,
 		}
 	} else {
+		logger.Info("Using specific origins CORS configuration")
 		corsConfig = cors.Config{
 			AllowOrigins:     allowedOrigins,
 			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"},

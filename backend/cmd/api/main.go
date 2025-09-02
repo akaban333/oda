@@ -105,9 +105,9 @@ func main() {
 	// Apply middleware
 	middlewareManager := middleware.NewMiddleware()
 	router.Use(gin.Recovery())
+	router.Use(middleware.CORS()) // Move CORS to the top
 	router.Use(middlewareManager.Logger())
 	router.Use(middlewareManager.RequestID())
-	router.Use(middleware.CORS())
 
 	// Apply rate limiting to all routes
 	router.Use(rateLimiter.RateLimit())
