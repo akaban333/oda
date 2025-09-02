@@ -194,9 +194,7 @@ const SocialFeed = () => {
 
   const toggleCommentLike = async (commentId) => {
     try {
-
-      const response = await postsAPI.likeComment(commentId);
-
+      await postsAPI.likeComment(commentId);
       
       // Update local state for comment likes
       const newLikedComments = new Set(likedComments);
@@ -375,7 +373,6 @@ const SocialFeed = () => {
         console.error('Error details:', {
           message: error.message,
           stack: error.stack,
-          response: error.response
         });
         setError('Failed to submit post. Please try again.');
       }
