@@ -50,7 +50,7 @@ const LoginPanel = ({ isOpen, onClose, onLogin }) => {
         localStorage.setItem("user", JSON.stringify(data.user));
         
         if (onLogin) {
-
+          console.log("onLogin called with user:", data.user);
           onLogin(data.user);
         }
       } else {

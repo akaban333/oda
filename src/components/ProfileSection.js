@@ -251,7 +251,7 @@ const ProfileSection = ({ user, refreshUserProfile }) => {
             <div className="flex-1">
               <div className="text-[#B8A17D] font-bold text-lg mb-2">BIO:</div>
               <div className="text-white text-lg leading-relaxed">
-                {user.bio || 'HI! I AM ERSA, I AM 20 YEARS OLD AND I AM IN MY THIRD YEAR OF BACHELOR STUDIES FOR SOFTWARE ENGINEERING.'}
+                {user.bio || 'No bio yet'}
               </div>
             </div>
           </div>

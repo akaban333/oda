@@ -166,7 +166,7 @@ function App() {
       <LoginPanel isOpen={isLoginOpen} onClose={closeLoginModal} onLogin={handleLogin} />
       <SignupModal isOpen={isSignupOpen} onClose={closeSignupModal} onSuccess={handleSignupSuccess} />
       {!isAuthenticated ? (
-        <LandingPage onLoginClick={openLoginModal} onSignupClick={openSignupModal} />
+        <LandingPage onLoginClick={openLoginModal} onSignupClick={openSignupModal} onLogin={handleLogin} />
       ) : (
         <HomePage user={user} refreshUserProfile={refreshUserProfile} onLogout={handleLogout} />
       )}

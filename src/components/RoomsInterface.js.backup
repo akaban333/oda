@@ -276,12 +276,12 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
         // Check if user is authenticated
         const token = localStorage.getItem('accessToken');
         if (!token) {
-
+          console.log('No access token found, skipping data fetch');
           setLoading(false);
           return;
         }
         
-
+        console.log('Fetching user data...');
         
         // Fetch user data in parallel
         const [userProfile, todosData, materialsData, notesData, privilegesData, roomsData] = await Promise.all([
@@ -293,8 +293,8 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
           roomsAPI.getRooms()
         ]);
         
-
-
+        console.log('Rooms API response:', roomsData);
+        console.log('Rooms array:', roomsData?.rooms);
         
         // Update user XP and profile
         setUserXP(userProfile.user?.xp || initialXP);
@@ -306,7 +306,7 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
         setUserNotes(notesData.notes || []);
         setUserRooms(roomsData.rooms || []);
         
-
+        console.log('Updated userRooms state:', roomsData.rooms || []);
         
         // Update privileges from backend
         if (privilegesData) {
@@ -420,7 +420,7 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
 
   // Add a new todo item - memoized with useCallback
   const addTodo = useCallback(async () => {
-
+    console.log('addTodo function called with newTodo:', newTodo);
     
     if (newTodo.trim() !== '') {
       try {
@@ -444,7 +444,7 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
           tags: []
         });
         
-
+        console.log('Todo created successfully:', newTodoData);
         setTodos(prev => [...prev, newTodoData.todo]);
         setNewTodo('');
         setShowTodoModal(false);
@@ -464,7 +464,7 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
         setError('Failed to create todo. Please try again.');
       }
     } else {
-
+      console.log('addTodo called but newTodo is empty');
     }
   }, [newTodo, setTodos, setNewTodo, setShowTodoModal, setError, currentRoom, activeSection]);
 
@@ -488,11 +488,11 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
 
   // Delete todo - memoized with useCallback
   const deleteTodo = useCallback(async (todoId) => {
-
+    console.log('deleteTodo called with todoId:', todoId);
     try {
       await todosAPI.deleteTodo(todoId);
       setTodos(prev => prev.filter(todo => todo.id !== todoId));
-
+      console.log('Todo deleted successfully');
       
       // Refresh shared rooms data to remove the deleted todo
       if (currentRoom) {
@@ -516,7 +516,7 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
 
   // Add material - memoized with useCallback
   const addMaterial = useCallback(async () => {
-
+    console.log('addMaterial function called with newMaterialUrl:', newMaterialUrl, 'uploadedFile:', uploadedFile);
     
     if ((newMaterialType === 'link' && newMaterialUrl.trim() !== '') || 
         (newMaterialType === 'upload' && uploadedFile)) {
@@ -546,11 +546,11 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
           };
         }
         
-
+        console.log('Attempting to create material with data:', materialData);
         
         const newMaterialData = await materialsAPI.createMaterial(materialData);
         
-
+        console.log('Material created successfully:', newMaterialData);
         setUserMaterials(prev => [...prev, newMaterialData.material]);
         setNewMaterialUrl('');
         setUploadedFile(null);
@@ -571,17 +571,17 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
         setError('Failed to create material. Please try again.');
       }
     } else {
-
+      console.log('addMaterial called but no valid material data');
     }
   }, [newMaterialUrl, newMaterialType, uploadedFile, setUserMaterials, setNewMaterialUrl, setUploadedFile, setShowMaterialModal, setError, currentRoom, activeSection]);
 
   // Delete material - memoized with useCallback
   const deleteMaterial = useCallback(async (materialId) => {
-
+    console.log('deleteMaterial called with materialId:', materialId);
     try {
       await materialsAPI.deleteMaterial(materialId);
       setUserMaterials(prev => prev.filter(material => material.id !== materialId));
-
+      console.log('Material deleted successfully');
       
       // Refresh shared rooms data to remove the deleted material
       if (currentRoom) {
@@ -605,7 +605,7 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
 
   // Add note - memoized with useCallback
   const handleAddNote = useCallback(async () => {
-
+    console.log('handleAddNote function called with newNote:', newNote);
     
     if (newNote.trim() !== '') {
       try {
@@ -621,7 +621,7 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
           isShared: false
         });
         
-
+        console.log('Note created successfully:', newNoteData);
         setUserNotes(prev => [...prev, newNoteData.note]);
         setNewNote('');
         setError(null); // Clear any previous errors
@@ -640,17 +640,17 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
         setError('Failed to create note. Please try again.');
       }
     } else {
-
+      console.log('handleAddNote called but newNote is empty');
     }
   }, [newNote, setUserNotes, setNewNote, setError, currentRoom, activeSection]);
 
   // Delete note - memoized with useCallback
   const deleteNote = useCallback(async (noteId) => {
-
+    console.log('deleteNote called with noteId:', noteId);
     try {
       await notesAPI.deleteNote(noteId);
       setUserNotes(prev => prev.filter(note => note.id !== noteId));
-
+      console.log('Note deleted successfully');
       
       // Refresh shared rooms data to remove the deleted note
       if (currentRoom) {
@@ -1075,7 +1075,7 @@ const RoomsInterface = ({ initialSection, initialXP }) => {
     
     return () => {
       if (wsConnection) {
-
+        console.log('Cleaning up existing WebSocket connection');
         wsConnection.close();
         setWsConnection(null);
       }

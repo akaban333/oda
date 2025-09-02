@@ -62,10 +62,10 @@ const SignupModal = ({ isOpen = true, onClose = () => {}, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log('Form submitted!');
     setServerError('');
     if (validateForm()) {
-
+      console.log('Validation passed, sending request...');
       try {
         const response = await fetch('http://localhost:8080/api/v1/auth/register', {
           method: 'POST',
@@ -76,7 +76,7 @@ const SignupModal = ({ isOpen = true, onClose = () => {}, onSuccess }) => {
             password: formData.password
           })
         });
-
+        console.log('Fetch response status:', response.status);
         if (response.status === 201) {
           setSuccess(true);
           setTimeout(() => {
@@ -93,7 +93,7 @@ const SignupModal = ({ isOpen = true, onClose = () => {}, onSuccess }) => {
         console.error('Network error:', err);
       }
     } else {
-
+      console.log('Validation failed:', serverError);
     }
   };
 

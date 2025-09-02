@@ -42,7 +42,7 @@ const SocialFeed = () => {
         setLoading(true);
         setError(null);
         
-
+        console.log('Fetching posts and notifications...');
         const [postsData, notificationsData] = await Promise.all([
           postsAPI.getPosts().catch(err => {
             console.error('Error fetching posts:', err);
@@ -54,14 +54,14 @@ const SocialFeed = () => {
           })
         ]);
         
-
-
+        console.log('Posts data:', postsData);
+        console.log('Notifications data:', notificationsData);
         
         // Debug: Log individual posts to see their structure
         if (postsData.posts && postsData.posts.length > 0) {
-
-
-
+          console.log('First post structure:', postsData.posts[0]);
+          console.log('First post authorName:', postsData.posts[0].authorName);
+          console.log('First post authorId:', postsData.posts[0].authorId);
         }
         
         setPosts(postsData.posts || []);
@@ -194,9 +194,9 @@ const SocialFeed = () => {
 
   const toggleCommentLike = async (commentId) => {
     try {
-
+      console.log('Toggling comment like for comment ID:', commentId);
       const response = await postsAPI.likeComment(commentId);
-
+      console.log('Comment like response:', response);
       
       // Update local state for comment likes
       const newLikedComments = new Set(likedComments);
@@ -233,26 +233,26 @@ const SocialFeed = () => {
           break;
         case 'friend_accepted':
           // Show friend accepted message
-
+          console.log('Friend request accepted by:', notification.data?.accepterUsername);
           break;
         case 'post_like':
           // Navigate to post or show post details
-
+          console.log('Post liked:', notification.targetId);
           break;
         case 'comment_like':
           // Navigate to comment or show comment details
-
+          console.log('Comment liked:', notification.targetId);
           break;
         case 'post_comment':
           // Navigate to post or show comment
-
+          console.log('Comment on post:', notification.targetId);
           break;
         case 'room_invitation':
           // Show room invitation actions
-
+          console.log('Room invitation to:', notification.data?.roomName);
           break;
         default:
-
+          console.log('Notification clicked:', notification);
       }
     } catch (error) {
       console.error('Error handling notification click:', error);
@@ -280,7 +280,7 @@ const SocialFeed = () => {
         const notificationsData = await notificationsAPI.getNotifications();
         setNotifications(notificationsData.notifications || []);
       } catch (refreshError) {
-
+        console.log('Could not refresh notifications, using local cleanup');
       }
       
       // Show success message
@@ -313,7 +313,7 @@ const SocialFeed = () => {
         const notificationsData = await notificationsAPI.getNotifications();
         setNotifications(notificationsData.notifications || []);
       } catch (refreshError) {
-
+        console.log('Could not refresh notifications, using local cleanup');
       }
       
       // Show success message
@@ -332,7 +332,7 @@ const SocialFeed = () => {
           content: newComment
         });
         
-
+        console.log('Comment created successfully:', newCommentData);
         
         // Update the posts state to include the new comment
         setPosts(prev => prev.map(post => 
@@ -361,10 +361,10 @@ const SocialFeed = () => {
           content: newPostContent
         });
         
-
-
-
-
+        console.log('Post created successfully:', newPostData);
+        console.log('New post structure:', newPostData.post);
+        console.log('New post authorName:', newPostData.post?.authorName);
+        console.log('New post authorId:', newPostData.post?.authorId);
         
         setPosts(prev => [newPostData.post, ...prev]);
         setNewPostContent('');
@@ -419,12 +419,12 @@ const SocialFeed = () => {
       
       console.log('Searching for user ID:', searchFriends.trim());
       const data = await usersAPI.searchUsers(searchFriends.trim());
-
+      console.log('Search response:', data);
       
       if (data && data.results && Array.isArray(data.results)) {
         if (data.results.length > 0) {
           setSearchResults(data.results);
-
+          console.log('Search results:', data.results);
         } else {
           setSearchResults([]);
           setSearchError('No users found with that ID');

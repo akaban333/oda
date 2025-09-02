@@ -117,7 +117,7 @@ const VideoCallRoom = ({ roomId, currentUser, onClose }) => {
         break;
         
       default:
-
+        console.log('Unknown message type:', data.type);
     }
   }, []);
 
@@ -168,13 +168,13 @@ const VideoCallRoom = ({ roomId, currentUser, onClose }) => {
 
   // End video call
   const endCall = useCallback(() => {
-
+    console.log('Ending call and cleaning up media streams...');
     
     // Stop all tracks in the local stream
     if (localStreamRef.current) {
       const tracks = localStreamRef.current.getTracks();
       tracks.forEach(track => {
-
+        console.log('Stopping track:', track.kind, track.id);
         track.stop();
       });
       localStreamRef.current = null;
@@ -184,7 +184,7 @@ const VideoCallRoom = ({ roomId, currentUser, onClose }) => {
     if (screenStreamRef.current) {
       const tracks = screenStreamRef.current.getTracks();
       tracks.forEach(track => {
-
+        console.log('Stopping screen share track:', track.kind, track.id);
         track.stop();
       });
       screenStreamRef.current = null;
@@ -217,7 +217,7 @@ const VideoCallRoom = ({ roomId, currentUser, onClose }) => {
       }));
     }
     
-
+    console.log('Call ended and cleanup completed');
   }, [ws, roomId]);
 
   // Toggle video
@@ -283,7 +283,7 @@ const VideoCallRoom = ({ roomId, currentUser, onClose }) => {
     if (screenStreamRef.current) {
       const tracks = screenStreamRef.current.getTracks();
       tracks.forEach(track => {
-
+        console.log('Stopping screen share track:', track.kind, track.id);
         track.stop();
       });
       screenStreamRef.current = null;
@@ -309,7 +309,7 @@ const VideoCallRoom = ({ roomId, currentUser, onClose }) => {
   const handleRTCSignaling = useCallback((data) => {
     // This is a simplified WebRTC implementation
     // In a production app, you'd want a more robust implementation
-
+    console.log('RTC signaling received:', data);
   }, []);
 
   // Send chat message
@@ -346,12 +346,12 @@ const VideoCallRoom = ({ roomId, currentUser, onClose }) => {
   // Cleanup function for component unmount
   useEffect(() => {
     return () => {
-
+      console.log('VideoCallRoom component unmounting, cleaning up...');
       // Ensure all media streams are stopped when component unmounts
       if (localStreamRef.current) {
         const tracks = localStreamRef.current.getTracks();
         tracks.forEach(track => {
-
+          console.log('Stopping track on unmount:', track.kind, track.id);
           track.stop();
         });
         localStreamRef.current = null;
@@ -360,7 +360,7 @@ const VideoCallRoom = ({ roomId, currentUser, onClose }) => {
       if (screenStreamRef.current) {
         const tracks = screenStreamRef.current.getTracks();
         tracks.forEach(track => {
-
+          console.log('Stopping screen share track on unmount:', track.kind, track.id);
           track.stop();
         });
         screenStreamRef.current = null;

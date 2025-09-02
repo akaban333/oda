@@ -5,7 +5,7 @@ import SocialFeed from './SocialFeed';
 import RoomsInterface from './RoomsInterface';
 
 const HomePage = ({ user, refreshUserProfile, onLogout }) => {
-
+  console.log("HomePage rendered with user:", user);
   const [activeTab, setActiveTab] = useState('profile');
 
   return (
