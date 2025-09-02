@@ -59,6 +59,18 @@ const apiRequest = async (endpoint, options = {}) => {
 
 // Auth API functions
 export const authAPI = {
+  // Login user
+  login: (email, password) => apiRequest('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password })
+  }),
+  
+  // Register new user
+  register: (data) => apiRequest('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  
   // Get current user profile
   getProfile: () => apiRequest('/auth/me'),
   
@@ -78,7 +90,10 @@ export const authAPI = {
   logout: () => apiRequest('/auth/logout', { method: 'POST' }),
   
   // Refresh token
-  refreshToken: () => apiRequest('/auth/refresh', { method: 'POST' })
+  refreshToken: (refreshToken) => apiRequest('/auth/refresh', {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken })
+  })
 };
 
 // Rooms API functions
