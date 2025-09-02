@@ -197,6 +197,14 @@ func registerRoutes(router *gin.Engine, mongoClient *database.MongoClient, jwtMa
 	// Auth routes
 	authRoutes := apiV1.Group("/auth")
 	{
+		// Add a simple test endpoint
+		authRoutes.GET("/test", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"message":   "Auth routes are working",
+				"timestamp": time.Now().Unix(),
+			})
+		})
+
 		authRoutes.POST("/register", internal_auth.RegisterHandler(mongoClient, jwtManager))
 		authRoutes.POST("/login", internal_auth.LoginHandler(mongoClient, jwtManager))
 		authRoutes.POST("/logout", middlewareManager.Auth(), internal_auth.LogoutHandler(mongoClient, jwtManager))
