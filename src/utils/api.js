@@ -2,7 +2,7 @@
 import logger from './logger';
 
 // Base API configuration - will be overridden by environment variables in production
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oda-production-de1e.up.railway.app/api/v1';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://backend-only-production-306d.up.railway.app/api/v1';
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
